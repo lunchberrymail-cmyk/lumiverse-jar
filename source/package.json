@@ -1,0 +1,12 @@
+{
+  "name": "lumiverse-jar-bridge",
+  "version": "0.2.8",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/backend.ts --target=bun --outfile=../dist/backend.js && bun build src/frontend.ts --target=browser --outfile=../dist/frontend.js",
+    "test": "bun test test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": { "lumiverse-spindle-types": "0.6.40", "typescript": "^5.9.3", "@types/bun": "latest" }
+}
