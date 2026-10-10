@@ -1,0 +1,13 @@
+{
+  "version": "0.2.8",
+  "name": "Janitor Import",
+  "identifier": "jar_companion",
+  "author": "Lunch",
+  "github": "https://github.com/lunchberrymail-cmyk/lumiverse-jar",
+  "homepage": "https://github.com/lunchberrymail-cmyk/lumiverse-jar",
+  "description": "Import Janitor characters through a connected login or JAR browser capture, with captured lore reconstruction and conversation exports.",
+  "permissions": ["cors_proxy", "characters", "world_books", "generation"],
+  "entry_backend": "dist/backend.js",
+  "entry_frontend": "dist/frontend.js",
+  "minimum_lumiverse_version": "1.2.5"
+}

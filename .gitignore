@@ -1,0 +1,14 @@
+**/node_modules/
+.env
+.env.*
+!.env.example
+*.local.json
+*.session.json
+*.log
+*.sqlite*
+*.db
+**/data/
+**/user-data/
+**/browsers/
+.cache/
+tmp/
