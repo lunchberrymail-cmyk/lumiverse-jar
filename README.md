@@ -28,6 +28,8 @@ For a phone running Lumiverse and a Windows PC running JAR, see [PHONE-SETUP.md]
 
 No-JAR URL fetching requires a usable Janitor session in Lumiverse's backend. This version has no supported native Janitor login connector, so signing into Janitor in another browser tab does not enable that fetch button. Public definitions remain subject to Janitor's access controls; missing content is reported without invention.
 
+**Open JanitorAI website** opens Janitor's sign-in page. Website links request navigation in the current tab so app browsers that block new windows can follow them; some app browsers hand external websites to a separate browser. Return to Lumiverse afterward. The character-page and full-workspace links follow the same behavior. These website links do not connect a Janitor session to Lumiverse. For a new import in this version, connect JAR first.
+
 Conversation exports are downloaded for Lumiverse's existing chat importer; the extension does not directly create chats. Captured lore reconstruction is approximate and may miss untriggered content. Cross-device networking and actual phone execution still need a live check.
 
 ## Development
