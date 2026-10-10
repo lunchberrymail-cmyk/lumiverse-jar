@@ -43,13 +43,15 @@ export function setup(ctx: SpindleFrontendContext) {
   function details(title: string, open = false) { const d = node('details'); d.open = open; d.append(node('summary', title)); root.append(d); return d; }
   const browserFlow = details('Janitor URL · no JAR', true);
   const publicUrl = field(browserFlow, 'JanitorAI character URL (public content only)', 'url');
-  const loginRequired = 'Login required. Native Janitor login is not available yet, so URL fetching is disabled. Signing in on JanitorAI’s website does not connect Lumiverse.';
+  const loginRequired = 'Direct fetching is unavailable: this version has no JanitorAI login connector for Lumiverse. Signing into the website cannot enable this fetch. Connect JAR below and use JAR capture instead.';
   const browserLoginHelp = 'A Janitor login is connected to Lumiverse. Fetching can still omit public fields or encounter a browser check.';
   const loginPrompt = node('p', 'Checking Janitor login connection…');
   loginPrompt.className = 'jar-status'; loginPrompt.setAttribute('role', 'note'); browserFlow.append(loginPrompt);
   const loginLinks = node('div'); loginLinks.className = 'jar-row';
-  const browserLogin = node('a', 'Log in on JanitorAI'); browserLogin.href = 'https://janitorai.com/login'; browserLogin.target = '_blank'; browserLogin.rel = 'noopener noreferrer'; loginLinks.append(browserLogin);
-  const characterPage = node('a', 'Open character page'); characterPage.target = '_blank'; characterPage.rel = 'noopener noreferrer'; loginLinks.append(characterPage); browserFlow.append(loginLinks);
+  // Same-tab navigation also works in app browsers that silently deny new windows.
+  const browserLogin = node('a', 'Open JanitorAI website'); browserLogin.href = 'https://janitorai.com/login'; browserLogin.target = '_self'; browserLogin.rel = 'noreferrer'; loginLinks.append(browserLogin);
+  const characterPage = node('a', 'Open character page'); characterPage.target = '_self'; characterPage.rel = 'noreferrer'; loginLinks.append(characterPage); browserFlow.append(loginLinks);
+  browserFlow.append(node('p', 'Website links may leave Lumiverse. Return here afterward. They open the website only and do not connect a login.'));
   for (const link of [browserLogin, characterPage]) {
     link.style.display = 'inline-block'; link.style.padding = '8px'; link.style.marginRight = '8px'; link.style.marginBottom = '8px';
     link.style.border = '1px solid #a98be980'; link.style.borderRadius = '8px'; link.style.textDecoration = 'underline';
@@ -67,7 +69,7 @@ export function setup(ctx: SpindleFrontendContext) {
     loginPrompt.textContent = 'The request did not return the complete character. Use the JAR connection to inspect or capture the missing fields.';
     loginPrompt.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
-  const publicFetchButton = button('Fetch character · login required', async () => {
+  const publicFetchButton = button('Fetch character · unavailable', async () => {
     if (!await checkJanitorAccess()) throw new Error(loginRequired);
     selected = null; list.value = ''; selections.clear(); previewRoot.replaceChildren(); updateImportAvailability();
     status.textContent = publicResult.textContent = 'Requesting public content…';
@@ -91,7 +93,7 @@ export function setup(ctx: SpindleFrontendContext) {
     janitorReady = connected;
     if (connected) delete publicFetchButton.dataset.unavailable; else publicFetchButton.dataset.unavailable = 'true';
     publicFetchButton.disabled = busy || !connected;
-    publicFetchButton.textContent = connected ? 'Fetch character' : 'Fetch character · login required';
+    publicFetchButton.textContent = connected ? 'Fetch character' : 'Fetch character · unavailable';
     loginPrompt.textContent = connected ? browserLoginHelp : error ? `${loginRequired} ${error}` : loginRequired;
   }
   async function checkJanitorAccess() {
@@ -110,7 +112,8 @@ export function setup(ctx: SpindleFrontendContext) {
     jarReady = true;
     status.textContent = 'Connected. Sign into JanitorAI on the companion machine, then inspect a character.'; connection.open = false; await refresh();
   }, connection);
-  const native = node('a', 'Open full JAR workspace ↗'); native.target = '_blank'; native.rel = 'noopener noreferrer'; native.href = 'http://127.0.0.1:4577/pair'; connection.append(native);
+  const native = node('a', 'Open full JAR workspace'); native.target = '_self'; native.rel = 'noreferrer'; native.href = 'http://127.0.0.1:4577/pair'; connection.append(native);
+  connection.append(node('p', 'The workspace link may leave Lumiverse. Return here afterward.'));
   function updateWorkspaceLink() {
     try {
       const u = new URL(workspaceUrl.value.trim() || url.value);
@@ -222,7 +225,7 @@ export function setup(ctx: SpindleFrontendContext) {
     list.replaceChildren(node('option', 'Select an import source')); list.options[0].value = '';
     for (const rec of records) { const o = node('option', rec.characterName || rec.id); o.value = rec.id; list.append(o); }
     if (chosen && records.some((r: Json) => r.id === chosen)) { list.value = chosen; await load(chosen); }
-    else if (!records.length) status.textContent = 'Fetch a Janitor character after connecting a login, or inspect one with JAR.';
+    else if (!records.length) status.textContent = janitorReady ? 'Fetch a Janitor character or inspect one with JAR.' : 'Connect JAR below, then inspect a character to begin.';
   }
   async function waitJob(jobId: string): Promise<Json> {
     sessionStorage.setItem(jobsKey, jobId);
