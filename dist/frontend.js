@@ -89,7 +89,7 @@ function setup(ctx) {
   }
   const browserFlow = details("Janitor URL · no JAR", true);
   const publicUrl = field(browserFlow, "JanitorAI character URL (public content only)", "url");
-  const loginRequired = "Login required. Native Janitor login is not available yet, so URL fetching is disabled. Signing in on JanitorAI’s website does not connect Lumiverse.";
+  const loginRequired = "Direct fetching is unavailable: this version has no JanitorAI login connector for Lumiverse. Signing into the website cannot enable this fetch. Connect JAR below and use JAR capture instead.";
   const browserLoginHelp = "A Janitor login is connected to Lumiverse. Fetching can still omit public fields or encounter a browser check.";
   const loginPrompt = node("p", "Checking Janitor login connection…");
   loginPrompt.className = "jar-status";
@@ -97,16 +97,17 @@ function setup(ctx) {
   browserFlow.append(loginPrompt);
   const loginLinks = node("div");
   loginLinks.className = "jar-row";
-  const browserLogin = node("a", "Log in on JanitorAI");
+  const browserLogin = node("a", "Open JanitorAI website");
   browserLogin.href = "https://janitorai.com/login";
-  browserLogin.target = "_blank";
-  browserLogin.rel = "noopener noreferrer";
+  browserLogin.target = "_self";
+  browserLogin.rel = "noreferrer";
   loginLinks.append(browserLogin);
   const characterPage = node("a", "Open character page");
-  characterPage.target = "_blank";
-  characterPage.rel = "noopener noreferrer";
+  characterPage.target = "_self";
+  characterPage.rel = "noreferrer";
   loginLinks.append(characterPage);
   browserFlow.append(loginLinks);
+  browserFlow.append(node("p", "Website links may leave Lumiverse. Return here afterward. They open the website only and do not connect a login."));
   for (const link of [browserLogin, characterPage]) {
     link.style.display = "inline-block";
     link.style.padding = "8px";
@@ -138,7 +139,7 @@ function setup(ctx) {
     loginPrompt.textContent = "The request did not return the complete character. Use the JAR connection to inspect or capture the missing fields.";
     loginPrompt.scrollIntoView({ block: "center", behavior: "smooth" });
   }
-  const publicFetchButton = button("Fetch character · login required", async () => {
+  const publicFetchButton = button("Fetch character · unavailable", async () => {
     if (!await checkJanitorAccess())
       throw new Error(loginRequired);
     selected = null;
@@ -180,7 +181,7 @@ function setup(ctx) {
     else
       publicFetchButton.dataset.unavailable = "true";
     publicFetchButton.disabled = busy || !connected;
-    publicFetchButton.textContent = connected ? "Fetch character" : "Fetch character · login required";
+    publicFetchButton.textContent = connected ? "Fetch character" : "Fetch character · unavailable";
     loginPrompt.textContent = connected ? browserLoginHelp : error ? `${loginRequired} ${error}` : loginRequired;
   }
   async function checkJanitorAccess() {
@@ -208,11 +209,12 @@ function setup(ctx) {
     connection.open = false;
     await refresh();
   }, connection);
-  const native = node("a", "Open full JAR workspace ↗");
-  native.target = "_blank";
-  native.rel = "noopener noreferrer";
+  const native = node("a", "Open full JAR workspace");
+  native.target = "_self";
+  native.rel = "noreferrer";
   native.href = "http://127.0.0.1:4577/pair";
   connection.append(native);
+  connection.append(node("p", "The workspace link may leave Lumiverse. Return here afterward."));
   function updateWorkspaceLink() {
     try {
       const u = new URL(workspaceUrl.value.trim() || url.value);
@@ -436,7 +438,7 @@ function setup(ctx) {
       list.value = chosen;
       await load(chosen);
     } else if (!records.length)
-      status.textContent = "Fetch a Janitor character after connecting a login, or inspect one with JAR.";
+      status.textContent = janitorReady ? "Fetch a Janitor character or inspect one with JAR." : "Connect JAR below, then inspect a character to begin.";
   }
   async function waitJob(jobId) {
     sessionStorage.setItem(jobsKey, jobId);
